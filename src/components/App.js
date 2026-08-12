@@ -1,158 +1,61 @@
-import React, { useState } from "react";
-import "./../styles/App.css";
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
+import ProductList from './components/ProductList';
+import Cart from './components/Cart';
+import Wishlist from './components/Wishlist';
+import Coupon from './components/Coupon';
+import './styles.css';
 
-const products = [
-  { id: 1, name: "Laptop", price: 50000 },
-  { id: 2, name: "Phone", price: 20000 },
-  { id: 3, name: "Headphones", price: 3000 }
-];
-
-const App = () => {
-  const [cart, setCart] = useState([]);
-  const [wishlist, setWishlist] = useState([]);
-  const [coupon, setCoupon] = useState("");
-  const [discount, setDiscount] = useState(0);
-
-  const addToCart = (product) => {
-    const item = cart.find((p) => p.id === product.id);
-
-    if (item) {
-      setCart(
-        cart.map((p) =>
-          p.id === product.id
-            ? { ...p, quantity: p.quantity + 1 }
-            : p
-        )
-      );
-    } else {
-      setCart([...cart, { ...product, quantity: 1 }]);
-    }
-  };
-
-  const removeFromCart = (id) => {
-    setCart(cart.filter((p) => p.id !== id));
-  };
-
-  const increaseQty = (id) => {
-    setCart(
-      cart.map((p) =>
-        p.id === id ? { ...p, quantity: p.quantity + 1 } : p
-      )
-    );
-  };
-
-  const decreaseQty = (id) => {
-    setCart(
-      cart
-        .map((p) =>
-          p.id === id
-            ? { ...p, quantity: p.quantity - 1 }
-            : p
-        )
-        .filter((p) => p.quantity > 0)
-    );
-  };
-
-  const addToWishlist = (product) => {
-    if (!wishlist.find((p) => p.id === product.id)) {
-      setWishlist([...wishlist, product]);
-    }
-  };
-
-  const removeFromWishlist = (id) => {
-    setWishlist(wishlist.filter((p) => p.id !== id));
-  };
-
-  const applyCoupon = () => {
-    if (coupon === "SAVE10") {
-      setDiscount(10);
-    }
-  };
-
-  const total = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-
-  const finalTotal = total - (total * discount) / 100;
+function App() {
+  const [activeTab, setActiveTab] = useState('products');
+  const cartCount = useSelector(state => state.cart.length);
+  const wishlistCount = useSelector(state => state.wishlist.length);
 
   return (
-    <div>
-      <h1>Shopping Cart</h1>
-
-      <h2>Products</h2>
-
-      {products.map((product) => (
-        <div key={product.id}>
-          <h3>{product.name}</h3>
-          <p>₹{product.price}</p>
-
-          <button onClick={() => addToCart(product)}>
-            Add To Cart
-          </button>
-
-          <button onClick={() => addToWishlist(product)}>
-            Add To Wishlist
-          </button>
-
-          <hr />
+    <div className="app">
+      <header className="header">
+        <h1>🛒 Shopping Cart</h1>
+        <div className="header-stats">
+          <span>🛍️ Cart: {cartCount}</span>
+          <span>❤️ Wishlist: {wishlistCount}</span>
         </div>
-      ))}
+      </header>
 
-      <h2>Cart</h2>
+      <nav className="tabs">
+        <button 
+          className={activeTab === 'products' ? 'active' : ''}
+          onClick={() => setActiveTab('products')}
+        >
+          📦 Products
+        </button>
+        <button 
+          className={activeTab === 'cart' ? 'active' : ''}
+          onClick={() => setActiveTab('cart')}
+        >
+          🛒 Cart ({cartCount})
+        </button>
+        <button 
+          className={activeTab === 'wishlist' ? 'active' : ''}
+          onClick={() => setActiveTab('wishlist')}
+        >
+          ❤️ Wishlist ({wishlistCount})
+        </button>
+        <button 
+          className={activeTab === 'coupon' ? 'active' : ''}
+          onClick={() => setActiveTab('coupon')}
+        >
+          🏷️ Coupon
+        </button>
+      </nav>
 
-      {cart.map((item) => (
-        <div key={item.id}>
-          <p>
-            {item.name} - ₹{item.price}
-          </p>
-
-          <button onClick={() => decreaseQty(item.id)}>
-            -
-          </button>
-
-          <span> {item.quantity} </span>
-
-          <button onClick={() => increaseQty(item.id)}>
-            +
-          </button>
-
-          <button onClick={() => removeFromCart(item.id)}>
-            Remove
-          </button>
-
-          <hr />
-        </div>
-      ))}
-
-      <input
-        type="text"
-        placeholder="Coupon Code"
-        value={coupon}
-        onChange={(e) => setCoupon(e.target.value)}
-      />
-
-      <button onClick={applyCoupon}>
-        Apply Coupon
-      </button>
-
-      <h3>Total: ₹{finalTotal}</h3>
-
-      <h2>Wishlist</h2>
-
-      {wishlist.map((item) => (
-        <div key={item.id}>
-          {item.name}
-
-          <button
-            onClick={() => removeFromWishlist(item.id)}
-          >
-            Remove
-          </button>
-        </div>
-      ))}
+      <div className="content">
+        {activeTab === 'products' && <ProductList />}
+        {activeTab === 'cart' && <Cart />}
+        {activeTab === 'wishlist' && <Wishlist />}
+        {activeTab === 'coupon' && <Coupon />}
+      </div>
     </div>
   );
-};
+}
 
 export default App;
